@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+#include "configdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -39,15 +39,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
+    ui->listWidget->clear();
+    ItemInfo.clear();
 
     char S[4] = {0};
     S[0] =0x5a;
     QHostAddress mcast_addr("224.0.0.88");
 
     udpSocket->writeDatagram(S, 4, mcast_addr, 60001);
-
-   // socket->readDatagram(S, 256, mcast_addr, 60001);
-    // #endif
 }
 void MainWindow::processPendingDatagrams()
 {
@@ -57,7 +56,44 @@ void MainWindow::processPendingDatagrams()
         datagram.resize(udpSocket->pendingDatagramSize());
         udpSocket->readDatagram(datagram.data(), datagram.size());
 
+        QString s;
+        s.prepend(datagram);
 
+        QStringList strlist = s.split(":");
+
+
+        for(QList<QString>::Iterator it = strlist.begin(); it != strlist.end(); ++it)
+        {
+            QStringList items = it->split("=");
+            if(items.size()>0)
+            {
+                if(items[0]=="notifyaddr")
+                {
+                    //ItemInfo.insert(, "");
+                }
+                else if(items[0]=="ip")
+                {
+                    ItemInfo.insert(items[0], items[1]);
+
+                }
+                else if(items[0]=="port")
+                {
+                    ItemInfo.insert(items[0], items[1]);
+                }
+            }
+        }
+
+        ui->listWidget->addItem(new QListWidgetItem(QString("%1:%2").arg(ItemInfo["ip"]).arg(ItemInfo["port"])));
     }
 //! [2]
+}
+
+void MainWindow::on_CfgButton_clicked()
+{
+    QListWidgetItem *item = ui->listWidget->currentItem();
+    if(item)
+    {
+        ConfigDialog dialog;
+        dialog.exec();
+    }
 }

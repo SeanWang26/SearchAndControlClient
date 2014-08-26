@@ -19,9 +19,12 @@ public:
 private slots:
     void on_pushButton_clicked();
     void processPendingDatagrams();
+    void on_CfgButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QUdpSocket *udpSocket;
+    QMap<QString, QString> ItemInfo;
 };
 
 #endif // MAINWINDOW_H
